@@ -1,0 +1,138 @@
+.matches-list-page {
+  padding: 15px;
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .match-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+
+    .series-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .match-info {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .match-time {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .match-actions {
+      display: flex;
+      flex-direction: row; // ✅ keep horizontal even on mobile
+      gap: 6px;
+
+      button {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+
+        &:first-child {
+          background-color: #28a745;
+          color: #fff;
+        }
+        &:last-child {
+          background-color: #dc3545;
+          color: #fff;
+        }
+
+        &:hover {
+          opacity: 0.9;
+        }
+      }
+    }
+
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      input {
+        padding: 6px 8px;
+        font-size: 13px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+
+      button {
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+
+        &:first-child {
+          background-color: #007bff;
+          color: #fff;
+        }
+
+        &:last-child {
+          background-color: #6c757d;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  // Mobile View
+  @media (max-width: 480px) {
+    padding: 10px;
+
+    .match-item {
+      padding: 8px;
+
+      .series-name {
+        font-size: 14px;
+      }
+
+      .match-info {
+        font-size: 12px;
+      }
+
+      .match-time {
+        font-size: 11px;
+      }
+
+      .match-actions {
+        flex-direction: row; // ✅ keep horizontal
+        flex-wrap: wrap; // allow wrapping if too long
+        gap: 4px;
+
+        button {
+          font-size: 11px;
+          padding: 5px 6px;
+          flex: 1; // optional: make buttons share row equally
+        }
+      }
+
+      .edit-form input {
+        font-size: 12px;
+        padding: 5px 6px;
+      }
+
+      .edit-form button {
+        font-size: 11px;
+        padding: 5px 6px;
+      }
+    }
+  }
+}

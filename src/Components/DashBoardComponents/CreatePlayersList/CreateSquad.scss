@@ -1,0 +1,157 @@
+.create-squad-mobile {
+  padding: 10px;
+  font-size: 13px;
+
+  .dropdown-row {
+    margin-bottom: 6px;
+    select {
+      width: 100%;
+      padding: 4px;
+      font-size: 13px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  }
+
+  .team-selection {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+
+    .team-column {
+      flex: 1;
+      min-width: 140px;
+      background-color: #f9f9f9;
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+
+      .team-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 3px;
+        margin-bottom: 4px;
+        font-size: 12px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+
+      .players-list {
+        max-height: 180px; // scrollable
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .create-btn {
+    margin-top: 6px;
+    width: 100%;
+    padding: 7px;
+    background-color: #4dade1;
+    color: white;
+    font-size: 13px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .squad-view {
+    margin-top: 8px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+
+    h3 {
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    div {
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+  }
+
+  .squad-card {
+    margin-top: 6px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    h4 {
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    div {
+      margin-bottom: 2px;
+      font-size: 12px;
+    }
+
+    button {
+      margin-right: 3px;
+      padding: 3px 5px;
+      font-size: 11px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+
+      &:first-of-type {
+        background-color: #28a745;
+        color: white;
+      }
+
+      &:last-of-type {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 480px) {
+    .team-selection {
+      flex-direction: row;
+      gap: 6px;
+      overflow-x: auto;
+
+      .team-column {
+        min-width: 130px;
+        flex: 1 0 45%;
+      }
+    }
+
+    .create-btn {
+      font-size: 14px;
+      padding: 8px;
+    }
+
+    .squad-card {
+      font-size: 12px;
+      button {
+        padding: 3px 5px;
+        font-size: 11px;
+      }
+    }
+  }
+}

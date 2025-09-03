@@ -1,0 +1,98 @@
+.top-stories {
+  padding: 15px;
+
+  .story-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+
+    input, textarea {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 8px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .stories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    .story-item {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      align-items: flex-start;
+      gap: 8px;
+
+      img {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .story-actions {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+
+        button {
+          flex: 1;
+          padding: 6px 0;
+          font-size: 12px;
+          font-weight: bold;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          background-color: #28a745;
+          color: #fff;
+
+          &:last-child {
+            background-color: #dc3545;
+          }
+
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .story-form input,
+    .story-form textarea,
+    .story-form button {
+      font-size: 12px;
+      padding: 5px;
+    }
+  }
+}

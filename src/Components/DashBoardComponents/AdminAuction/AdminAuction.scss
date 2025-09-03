@@ -1,0 +1,305 @@
+.auction-admin-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: sans-serif;
+  font-size: 13px;
+
+  .auction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #1d244b; // Blue
+    color: #fff;
+    margin-bottom: 6px;
+
+    .match-info {
+      display: flex;
+      gap: 8px;
+
+      .match-name {
+        font-weight: 600;
+        color: white;
+      }
+      .match-type {
+        color: #fef08a;
+      }
+    }
+
+    .wallet {
+      font-weight: 600;
+      background: #05f2ce;
+      color: #000;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+  }
+
+  .auction-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 6px 0;
+    overflow-x: auto;
+    padding: 5px;
+
+    button {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      background: #d1d5db;
+      color: #000;
+      cursor: pointer;
+
+      &.active {
+        background: #05f2ce;
+        color: #fff;
+      }
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+
+  .dropdown-container {
+    overflow-x: auto;
+    margin-bottom: 6px;
+    padding: 5px;
+  }
+
+  .player-scroll {
+    display: flex;
+    gap: 6px;
+  }
+
+  .player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    background: #f5f5f5;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+
+    &.current {
+      border: 2px solid #1d4ed8;
+    }
+
+    img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-bottom: 2px;
+    }
+    span {
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .sold-label {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #9333ea;
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 4px;
+      border-radius: 0 4px 0 4px;
+    }
+  }
+
+  .current-player {
+    margin-bottom: 6px;
+    .player-card {
+      background: #eef6ff;
+      padding: 6px;
+    }
+  }
+
+  .chatbox {
+    flex: 1;
+    overflow-y: auto;
+    background: #cfe4e4;
+    padding: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .empty-chat {
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+    }
+
+    .chat-message {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .user-icon {
+        width: 30px;
+        height: 30px;
+        background-color: #ccc;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 8px;
+      }
+
+      .chat-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .chat-amount {
+          background-color: #f0f0f0;
+          padding: 6px 10px;
+          border-radius: 12px;
+          font-weight: 500;
+        }
+
+        .chat-time {
+          font-size: 10px;
+          color: #888;
+        }
+      }
+
+      &.right {
+        flex-direction: row-reverse;
+
+        .user-icon {
+          margin-left: 8px;
+          margin-right: 0;
+        }
+
+        .chat-content .chat-amount {
+          background-color: #d1e7ff;
+        }
+      }
+
+      &.system {
+        justify-content: center;
+        .chat-content {
+          .chat-amount {
+            background: transparent;
+            font-style: italic;
+            color: #555;
+          }
+        }
+      }
+    }
+  }
+
+  .footer-bid-buttons {
+    display: flex;
+    gap: 4px;
+    padding: 6px 8px;
+    background: #fff;
+    border-top: 1px solid #ccc;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    button {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 13px;
+      border-radius: 6px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+
+      &:nth-child(1) {
+        background: #f87171;
+      }
+      &:nth-child(2) {
+        background: #fb923c;
+      }
+      &:nth-child(3) {
+        background: #facc15;
+        color: #000;
+      }
+      &:nth-child(4) {
+        background: #34d399;
+      }
+      &:nth-child(5) {
+        background: #60a5fa;
+      }
+      &:nth-child(6) {
+        background: #9333ea;
+      }
+      &:nth-child(7) {
+        background: #64748b;
+      }
+    }
+  }
+
+  .sold-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    z-index: 1000;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+
+    .popup-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+
+      h4 {
+        margin: 4px 0;
+        font-size: 16px;
+      }
+      img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+      }
+      p {
+        font-size: 13px;
+        margin: 2px 0;
+      }
+
+      button {
+        margin-top: 6px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        background: #3b82f6;
+        color: #fff;
+        cursor: pointer;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    .auction-buttons button,
+    .footer-bid-buttons button {
+      font-size: 12px;
+      padding: 8px 0;
+    }
+    .player-card img {
+      width: 45px;
+      height: 45px;
+    }
+    .current-player .player-card img {
+      width: 50px;
+      height: 50px;
+    }
+  }
+}
