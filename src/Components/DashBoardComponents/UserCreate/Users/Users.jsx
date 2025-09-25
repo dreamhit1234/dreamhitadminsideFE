@@ -1,8 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import CreateUser from "./CreateUser";
 import "./Users.scss";
 
-const Users = ({ users, onBack }) => {
+const Users = ({ onBack }) => {
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // ✅ fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/users");
+      setUsers(res.data); // update state with backend data
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
+
+  // ✅ add newly created user to state immediately
+  const handleUserCreated = (newUser) => {
+    setUsers((prev) => [...prev, newUser]);
+  };
 
   const filteredUsers = users.filter(
     (u) =>
@@ -12,17 +34,11 @@ const Users = ({ users, onBack }) => {
 
   return (
     <div className="users-component">
-      {/* Top Row */}
       <div className="users-top-row">
-        <button className="back-btn" onClick={onBack}>
-          ← Back
-        </button>
-        <button className="close-btn" onClick={onBack}>
-          ✕ Close
-        </button>
+        <button className="back-btn" onClick={onBack}>← Back</button>
+        <button className="close-btn" onClick={onBack}>✕ Close</button>
       </div>
 
-      {/* Title & Search */}
       <div className="title-search-row">
         <h2>Users</h2>
         <input
@@ -33,7 +49,8 @@ const Users = ({ users, onBack }) => {
         />
       </div>
 
-      {/* Users Table */}
+      <CreateUser onUserCreated={handleUserCreated} existingUsers={users} />
+
       <div className="table-container">
         <table className="users-table">
           <thead>
@@ -49,7 +66,7 @@ const Users = ({ users, onBack }) => {
           </thead>
           <tbody>
             {filteredUsers.map((user, idx) => (
-              <tr key={idx} className={idx % 2 === 0 ? "even-row" : "odd-row"}>
+              <tr key={user.id} className={idx % 2 === 0 ? "even-row" : "odd-row"}>
                 <td>{idx + 1}</td>
                 <td>{user.username}</td>
                 <td>{user.password}</td>

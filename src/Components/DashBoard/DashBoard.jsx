@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./DashBoard.scss";
 
 import CreateUser from "../DashBoardComponents/UserCreate/UserCreate";
@@ -9,7 +10,7 @@ import AddWallet from "../DashBoardComponents/AddWallet/AddWallet";
 import CreatePlayers from "../DashBoardComponents/CreatePlayers/CreatePlayers";
 import CreateSquads from "../DashBoardComponents/CreatePlayersList/CreateSquad";
 import LeaderBoardAdmin from "../DashBoardComponents/LeaderBoard/LeaderBoard";
-import AdminAuction from "../DashBoardComponents/AdminAuction/AdminAuction"; // ✅ Auction Import
+import AdminAuction from "../DashBoardComponents/AdminAuction/AdminAuction";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState(null);
@@ -19,8 +20,22 @@ const AdminDashboard = () => {
   const [players, setPlayers] = useState([]);
   const [showCreateUser, setShowCreateUser] = useState(false);
 
+  // Fetch users
+  useEffect(() => {
+    axios.get("http://localhost:8080/users")
+      .then(res => setUsers(res.data))
+      .catch(err => console.error(err));
+  }, []);
+
+  // Fetch matches
+  useEffect(() => {
+    axios.get("http://localhost:8080/matches")
+      .then(res => setMatches(res.data))
+      .catch(err => console.error(err));
+  }, []);
+
   const handleUserCreated = (newUser) => {
-    setUsers([...users, newUser]);
+    setUsers(prev => [...prev, newUser]);
   };
 
   return (
@@ -35,7 +50,7 @@ const AdminDashboard = () => {
         <button onClick={() => setActiveTab("createPlayers")}>Create Players</button>
         <button onClick={() => setActiveTab("createPlayersList")}>Create Squad</button>
         <button onClick={() => setActiveTab("leaderboard")}>LeaderBoard</button>
-        <button onClick={() => setActiveTab("auction")}>Admin Auction</button> {/* ✅ Auction Tab */}
+        <button onClick={() => setActiveTab("auction")}>Admin Auction</button>
       </div>
 
       {/* Users Table */}
@@ -53,8 +68,8 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((u, i) => (
-                <tr key={i}>
+              {users.map(u => (
+                <tr key={u.id}>
                   <td>{u.name}</td>
                   <td>{u.mobile}</td>
                   <td>{u.username}</td>
@@ -118,7 +133,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* ✅ Admin Auction */}
+      {/* Admin Auction */}
       {activeTab === "auction" && (
         <div className="admin-auction-page">
           <h3>Admin Auction</h3>
