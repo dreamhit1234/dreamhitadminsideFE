@@ -1,46 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./TopStories.scss";
 
 export default function TopStories() {
   const [stories, setStories] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [newStory, setNewStory] = useState({
     title: "",
     description: "",
     image: "",
   });
 
+  // ✅ Fetch stories from backend when component loads
+  useEffect(() => {
+    fetchStories();
+  }, []);
+
+  const fetchStories = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/topstories");
+      setStories(res.data);
+    } catch (err) {
+      console.error("Error fetching stories:", err);
+    }
+  };
+
   const handleChange = (e) => {
     setNewStory({ ...newStory, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // ✅ Add or Update story in backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingIndex !== null) {
-      const updatedStories = [...stories];
-      updatedStories[editingIndex] = newStory;
-      setStories(updatedStories);
-      setEditingIndex(null);
-    } else {
-      setStories([...stories, newStory]);
+    try {
+      if (editingId) {
+        // update
+        await axios.put(`http://localhost:8080/topstories/${editingId}`, newStory);
+      } else {
+        // create
+        await axios.post("http://localhost:8080/topstories", newStory);
+      }
+      setNewStory({ title: "", description: "", image: "" });
+      setEditingId(null);
+      fetchStories(); // refresh list
+    } catch (err) {
+      console.error("Error saving story:", err);
     }
-    setNewStory({ title: "", description: "", image: "" });
   };
 
-  const handleEdit = (index) => {
-    setEditingIndex(index);
-    setNewStory(stories[index]);
+  // ✅ Edit existing story
+  const handleEdit = (story) => {
+    setEditingId(story.id);
+    setNewStory({
+      title: story.title,
+      description: story.description,
+      image: story.image,
+    });
   };
 
-  const handleDelete = (index) => {
-    const updatedStories = stories.filter((_, i) => i !== index);
-    setStories(updatedStories);
-    if (editingIndex === index) setEditingIndex(null);
+  // ✅ Delete story from backend
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/topstories/${id}`);
+      fetchStories();
+    } catch (err) {
+      console.error("Error deleting story:", err);
+    }
   };
 
   return (
     <div className="top-stories">
-        <h2>Top Stories</h2>
+      <h2>Top Stories</h2>
       <form className="story-form" onSubmit={handleSubmit}>
         <input
           type="text"
@@ -64,21 +94,23 @@ export default function TopStories() {
           value={newStory.image}
           onChange={handleChange}
         />
-        <button type="submit">{editingIndex !== null ? "Save" : "Add Story"}</button>
+        <button type="submit">
+          {editingId ? "Save Changes" : "Add Story"}
+        </button>
       </form>
 
       <div className="stories-list">
         {stories.length === 0 ? (
           <p>No stories added yet.</p>
         ) : (
-          stories.map((story, index) => (
-            <div key={index} className="story-item">
+          stories.map((story) => (
+            <div key={story.id} className="story-item">
               {story.image && <img src={story.image} alt={story.title} />}
               <h4>{story.title}</h4>
               <p>{story.description}</p>
               <div className="story-actions">
-                <button onClick={() => handleEdit(index)}>Edit</button>
-                <button onClick={() => handleDelete(index)}>Delete</button>
+                <button onClick={() => handleEdit(story)}>Edit</button>
+                <button onClick={() => handleDelete(story.id)}>Delete</button>
               </div>
             </div>
           ))

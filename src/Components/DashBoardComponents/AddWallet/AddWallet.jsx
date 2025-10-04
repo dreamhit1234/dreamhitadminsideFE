@@ -1,33 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./AddWallet.scss";
 
-export default function AddWallet({ users, setUsers }) {
+export default function AddWallet() {
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
   const [amount, setAmount] = useState("");
 
-  const handleAdd = () => {
+  // ✅ Load users from backend
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/wallet/users")
+      .then((res) => setUsers(res.data))
+      .catch((err) => console.error("Error loading users:", err));
+  }, []);
+
+  // ✅ Add Amount
+  const handleAdd = async () => {
     if (!selectedUser || !amount) return;
-    const updated = users.map((user) => {
-      if (user.username === selectedUser) {
-        return { ...user, wallet: (user.wallet || 0) + parseFloat(amount) };
-      }
-      return user;
-    });
-    setUsers(updated);
-    setAmount("");
+    try {
+      await axios.post("http://localhost:8080/wallet/add", {
+        username: selectedUser,
+        amount: parseFloat(amount),
+      });
+      reloadUsers();
+      setAmount("");
+    } catch (err) {
+      console.error("Error adding amount:", err);
+    }
   };
 
-  const handleRemove = () => {
+  // ✅ Remove Amount
+  const handleRemove = async () => {
     if (!selectedUser || !amount) return;
-    const updated = users.map((user) => {
-      if (user.username === selectedUser) {
-        const newAmount = (user.wallet || 0) - parseFloat(amount);
-        return { ...user, wallet: newAmount >= 0 ? newAmount : 0 };
-      }
-      return user;
-    });
-    setUsers(updated);
-    setAmount("");
+    try {
+      await axios.post("http://localhost:8080/wallet/remove", {
+        username: selectedUser,
+        amount: parseFloat(amount),
+      });
+      reloadUsers();
+      setAmount("");
+    } catch (err) {
+      console.error("Error removing amount:", err);
+    }
+  };
+
+  const reloadUsers = () => {
+    axios
+      .get("http://localhost:8080/wallet/users")
+      .then((res) => setUsers(res.data))
+      .catch((err) => console.error("Error loading users:", err));
   };
 
   return (
@@ -68,7 +90,7 @@ export default function AddWallet({ users, setUsers }) {
           <ul>
             {users.map((u, i) => (
               <li key={i}>
-                {u.name} ({u.username}) : ₹{u.wallet || 0}
+                {u.name} ({u.username}) : ₹{u.amount || 0}
               </li>
             ))}
           </ul>

@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./DashBoard.scss";
 
+// Components
 import CreateUser from "../DashBoardComponents/UserCreate/UserCreate";
 import Transactions from "../DashBoardComponents/Transactions/Transactions";
 import CreateMatch from "../DashBoardComponents/CreateMatch/CreateMatch";
@@ -12,30 +13,45 @@ import CreateSquads from "../DashBoardComponents/CreatePlayersList/CreateSquad";
 import LeaderBoardAdmin from "../DashBoardComponents/LeaderBoard/LeaderBoard";
 import AdminAuction from "../DashBoardComponents/AdminAuction/AdminAuction";
 
+import "./DashBoard.scss";
+
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState(null);
+  // localStorage లో last activeTab save చేసి, refresh అయినా retain అవ్వడానికి
+  const [activeTab, setActiveTab] = useState(
+    () => localStorage.getItem("activeTab") || null
+  );
+
   const [users, setUsers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [stories, setStories] = useState([]);
   const [players, setPlayers] = useState([]);
   const [showCreateUser, setShowCreateUser] = useState(false);
 
-  // Fetch users
+  // activeTab మారినప్పుడల్లా localStorage లో update అవుతుంది
   useEffect(() => {
-    axios.get("http://localhost:8080/users")
-      .then(res => setUsers(res.data))
-      .catch(err => console.error(err));
+    if (activeTab) {
+      localStorage.setItem("activeTab", activeTab);
+    }
+  }, [activeTab]);
+
+  // Users data fetch
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/users")
+      .then((res) => setUsers(res.data))
+      .catch((err) => console.error("Users Fetch Error:", err));
   }, []);
 
-  // Fetch matches
+  // Matches data fetch
   useEffect(() => {
-    axios.get("http://localhost:8080/matches")
-      .then(res => setMatches(res.data))
-      .catch(err => console.error(err));
+    axios
+      .get("http://localhost:8080/matches")
+      .then((res) => setMatches(res.data))
+      .catch((err) => console.error("Matches Fetch Error:", err));
   }, []);
 
   const handleUserCreated = (newUser) => {
-    setUsers(prev => [...prev, newUser]);
+    setUsers((prev) => [...prev, newUser]);
   };
 
   return (
@@ -65,16 +81,18 @@ const AdminDashboard = () => {
                 <th>Username</th>
                 <th>Password</th>
                 <th>Withdraw Password</th>
+                <th>Wallet</th>
               </tr>
             </thead>
             <tbody>
-              {users.map(u => (
+              {users.map((u) => (
                 <tr key={u.id}>
                   <td>{u.name}</td>
                   <td>{u.mobile}</td>
                   <td>{u.username}</td>
                   <td>{u.password}</td>
                   <td>{u.withdrawPassword}</td>
+                  <td>{u.amount ?? 0}</td>
                 </tr>
               ))}
             </tbody>
@@ -83,63 +101,42 @@ const AdminDashboard = () => {
       )}
 
       {/* Transactions */}
-      {activeTab === "transactions" && <Transactions onClose={() => setActiveTab(null)} />}
+      {activeTab === "transactions" && (
+        <Transactions onClose={() => setActiveTab(null)} />
+      )}
 
       {/* Create Match */}
       {activeTab === "createMatch" && (
-        <div className="create-match-page">
-          <h3>Create Matches</h3>
-          <CreateMatch matches={matches} setMatches={setMatches} />
-        </div>
+        <CreateMatch matches={matches} setMatches={setMatches} />
       )}
 
       {/* Top Stories */}
       {activeTab === "topStories" && (
-        <div className="top-stories-page">
-          <h3>Top Stories</h3>
-          <TopStories stories={stories} setStories={setStories} />
-        </div>
+        <TopStories stories={stories} setStories={setStories} />
       )}
 
       {/* Add Wallet */}
       {activeTab === "addwallet" && (
-        <div className="add-wallet-page">
-          <h3>Add / Remove Wallet Amount</h3>
-          <AddWallet users={users} setUsers={setUsers} />
-        </div>
+        <AddWallet users={users} setUsers={setUsers} />
       )}
 
       {/* Create Players */}
       {activeTab === "createPlayers" && (
-        <div className="create-players-page">
-          <h3>Create Players</h3>
-          <CreatePlayers players={players} setPlayers={setPlayers} />
-        </div>
+        <CreatePlayers players={players} setPlayers={setPlayers} />
       )}
 
       {/* Create Squad */}
       {activeTab === "createPlayersList" && (
-        <div className="create-players-list-page">
-          <h3>Create Squad</h3>
-          <CreateSquads matches={matches} allPlayers={players} />
-        </div>
+        <CreateSquads matches={matches} allPlayers={players} />
       )}
 
       {/* LeaderBoard */}
       {activeTab === "leaderboard" && (
-        <div className="leaderboard-page">
-          <h3>LeaderBoard</h3>
-          <LeaderBoardAdmin players={players} />
-        </div>
+        <LeaderBoardAdmin players={players} />
       )}
 
       {/* Admin Auction */}
-      {activeTab === "auction" && (
-        <div className="admin-auction-page">
-          <h3>Admin Auction</h3>
-          <AdminAuction />
-        </div>
-      )}
+      {activeTab === "auction" && <AdminAuction />}
 
       {/* Create User Modal */}
       {showCreateUser && (
@@ -154,3 +151,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -1,54 +1,121 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./Transactions.scss";
 
-const Transactions = ({ onClose }) => {
+const Transactions = () => {
   const [activeTab, setActiveTab] = useState("deposit");
-  const [filter, setFilter] = useState("all");
-
-  const [depositData, setDepositData] = useState([
-    { id: 1, userid: "USR123", amount: 500, utr: "UTR123", image: "https://pbs.twimg.com/media/GiYPyLsXIAAADXT.jpg", status: null },
-  ]);
-
-  const [withdrawData, setWithdrawData] = useState([
-    { id: 1, userid: "USR456", amount: 300, bank: { holder: "John Doe", account: "1234567890", ifsc: "IFSC001" }, status: null },
-  ]);
-
+  const [filter, setFilter] = useState("pending");
+  const [depositData, setDepositData] = useState([]);
+  const [withdrawData, setWithdrawData] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [modal, setModal] = useState(null);
-  const [bankModal, setBankModal] = useState(null); // new state for bank modal
+  const [bankModal, setBankModal] = useState(null);
 
-  const handleAccept = (txn, type) => {
-    if (type === "deposit") {
-      setDepositData(prev => prev.map(d => (d.id === txn.id ? { ...d, status: "accepted" } : d)));
-      setModal({ msg: `Deposit Successful!\nUserID: ${txn.userid}\nAmount: ${txn.amount}` });
-    } else {
-      setWithdrawData(prev => prev.map(w => (w.id === txn.id ? { ...w, status: "accepted" } : w)));
-      setModal({ msg: `Withdraw Done!\nUserID: ${txn.userid}\nAmount: ${txn.amount}` });
+  useEffect(() => {
+    fetchDeposits();
+    fetchWithdrawals();
+  }, []);
+
+  const fetchDeposits = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/deposits");
+      setDepositData(res.data || []);
+    } catch (err) {
+      console.error("Error fetching deposits:", err);
     }
   };
 
-  const handleReject = (txn, type, reason) => {
-    if (type === "deposit") {
-      setDepositData(prev => prev.map(d => (d.id === txn.id ? { ...d, status: "rejected", reason } : d)));
-    } else {
-      setWithdrawData(prev => prev.map(w => (w.id === txn.id ? { ...w, status: "rejected", reason } : w)));
+  const fetchWithdrawals = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/withdrawals");
+      setWithdrawData(res.data || []);
+    } catch (err) {
+      console.error("Error fetching withdrawals:", err);
     }
-    setModal({ msg: `Rejected!\nReason: ${reason}\nUserID: ${txn.userid}` });
   };
 
-  const filteredData = data => {
-    if (filter === "accepted") return data.filter(d => d.status === "accepted");
-    if (filter === "rejected") return data.filter(d => d.status === "rejected");
-    return data;
+  const handleAccept = async (txn, type) => {
+    try {
+      const url =
+        type === "deposit"
+          ? `http://localhost:8080/deposits/${txn.id}`
+          : `http://localhost:8080/withdrawals/${txn.id}`;
+
+      await axios.put(url, { status: "accepted" });
+
+      setModal({
+        msg: `${
+          type === "deposit" ? "Deposit" : "Withdrawal"
+        } Successful!\nUserID: ${txn.userId}\nAmount: ₹${txn.amount}`,
+      });
+
+      if (type === "deposit") {
+        setDepositData((prev) =>
+          prev.map((d) => (d.id === txn.id ? { ...d, status: "accepted" } : d))
+        );
+      } else {
+        setWithdrawData((prev) =>
+          prev.map((w) => (w.id === txn.id ? { ...w, status: "accepted" } : w))
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReject = async (txn, type, reason) => {
+    try {
+      const url =
+        type === "deposit"
+          ? `http://localhost:8080/deposits/${txn.id}`
+          : `http://localhost:8080/withdrawals/${txn.id}`;
+
+      await axios.put(url, { status: "rejected", reason });
+
+      setModal({
+        msg: `Rejected!\nReason: ${reason}\nUserID: ${txn.userId}`,
+      });
+
+      if (type === "deposit") {
+        setDepositData((prev) =>
+          prev.map((d) => (d.id === txn.id ? { ...d, status: "rejected" } : d))
+        );
+      } else {
+        setWithdrawData((prev) =>
+          prev.map((w) => (w.id === txn.id ? { ...w, status: "rejected" } : w))
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filteredData = (data) => {
+    if (filter === "accepted")
+      return data.filter((d) => d.status === "accepted");
+    if (filter === "rejected")
+      return data.filter((d) => d.status === "rejected");
+    return data.filter((d) => d.status === "pending");
   };
 
   return (
     <div className="transactions">
+      {/* Tabs + Filter */}
       <div className="actions-row">
-        <button className={`deposit ${activeTab === "deposit" ? "active" : ""}`} onClick={() => setActiveTab("deposit")}>Deposit</button>
-        <button className={`withdraw ${activeTab === "withdraw" ? "active" : ""}`} onClick={() => setActiveTab("withdraw")}>Withdraw</button>
-        <select onChange={e => setFilter(e.target.value)} value={filter}>
-          <option value="all">All</option>
+        <button
+          className={activeTab === "deposit" ? "deposit active" : "deposit"}
+          onClick={() => setActiveTab("deposit")}
+        >
+          Deposits
+        </button>
+        <button
+          className={activeTab === "withdraw" ? "withdraw active" : "withdraw"}
+          onClick={() => setActiveTab("withdraw")}
+        >
+          Withdrawals
+        </button>
+        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+          <option value="pending">Pending</option>
           <option value="accepted">Accepted</option>
           <option value="rejected">Rejected</option>
         </select>
@@ -60,22 +127,53 @@ const Transactions = ({ onClose }) => {
           <thead>
             <tr>
               <th>User ID</th>
+              <th>UTR</th>
+              <th>Screenshot</th>
               <th>Amount</th>
-              <th>UTR Number</th>
-              <th>Image</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredData(depositData).map(txn => (
+            {filteredData(depositData).map((txn) => (
               <tr key={txn.id}>
-                <td>{txn.userid}</td>
-                <td>{txn.amount}</td>
+                <td>{txn.userId}</td>
                 <td>{txn.utr}</td>
-                <td><button className="view-btn" onClick={() => setSelectedImage(txn.image)}>View</button></td>
+                <td>
+                  {txn.image ? (
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        setSelectedImage("http://localhost:8080" + txn.image)
+                      }
+                    >
+                      View
+                    </button>
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
+                <td>₹{txn.amount}</td>
                 <td className="actions">
-                  <button className="accept-btn" onClick={() => handleAccept(txn, "deposit")}>Accept</button>
-                  <button className="reject-btn" onClick={() => handleReject(txn, "deposit", "Fake Payment")}>Reject</button>
+                  {txn.status === "pending" ? (
+                    <>
+                      <button
+                        className="accept-btn"
+                        onClick={() => handleAccept(txn, "deposit")}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="reject-btn"
+                        onClick={() =>
+                          handleReject(txn, "deposit", "Fake Payment")
+                        }
+                      >
+                        Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`status-${txn.status}`}>{txn.status}</span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -90,19 +188,48 @@ const Transactions = ({ onClose }) => {
             <tr>
               <th>User ID</th>
               <th>Amount</th>
-              <th>Bank Details</th>
+              <th>Bank</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredData(withdrawData).map(txn => (
+            {filteredData(withdrawData).map((txn) => (
               <tr key={txn.id}>
-                <td>{txn.userid}</td>
-                <td>{txn.amount}</td>
-                <td><button className="view-btn" onClick={() => setBankModal(txn.bank)}>View</button></td>
+                <td>{txn.userId}</td>
+                <td>₹{txn.amount}</td>
+                <td>
+                  {txn.bank ? (
+                    <button
+                      className="view-btn"
+                      onClick={() => setBankModal(txn.bank)}
+                    >
+                      View
+                    </button>
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
                 <td className="actions">
-                  <button className="accept-btn" onClick={() => handleAccept(txn, "withdraw")}>Accept</button>
-                  <button className="reject-btn" onClick={() => handleReject(txn, "withdraw", "Bank Issue")}>Reject</button>
+                  {txn.status === "pending" ? (
+                    <>
+                      <button
+                        className="accept-btn"
+                        onClick={() => handleAccept(txn, "withdraw")}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="reject-btn"
+                        onClick={() =>
+                          handleReject(txn, "withdraw", "Bank Issue")
+                        }
+                      >
+                        Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`status-${txn.status}`}>{txn.status}</span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -120,17 +247,7 @@ const Transactions = ({ onClose }) => {
         </div>
       )}
 
-      {/* Success/Reject Modal */}
-      {modal && (
-        <div className="modal">
-          <div className="modal-content">
-            <p style={{ whiteSpace: "pre-line" }}>{modal.msg}</p>
-            <button onClick={() => setModal(null)}>OK</button>
-          </div>
-        </div>
-      )}
-
-      {/* Bank Details Modal */}
+      {/* Bank Modal */}
       {bankModal && (
         <div className="modal">
           <div className="modal-content">
@@ -139,6 +256,16 @@ const Transactions = ({ onClose }) => {
             <p>Account: {bankModal.account}</p>
             <p>IFSC: {bankModal.ifsc}</p>
             <button onClick={() => setBankModal(null)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Status Modal */}
+      {modal && (
+        <div className="modal">
+          <div className="modal-content">
+            <p style={{ whiteSpace: "pre-line" }}>{modal.msg}</p>
+            <button onClick={() => setModal(null)}>OK</button>
           </div>
         </div>
       )}

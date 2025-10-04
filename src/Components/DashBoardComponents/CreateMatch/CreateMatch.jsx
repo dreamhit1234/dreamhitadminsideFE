@@ -42,7 +42,7 @@ export default function CreateMatch() {
     e.preventDefault();
     try {
       const matchToSend = { ...newMatch, time: `${newMatch.date}T${newMatch.time}` };
-      const res = await axios.post("http://localhost:8080/matches", matchToSend);
+      const res = await axios.post("http://localhost:8080/matches", matchToSend); // ✅ Correct URL
       setMatches([...matches, res.data]);
       setNewMatch({ series: "", team1: "", team2: "", format: "T20", count: "6", date: "", time: "" });
     } catch (err) {
@@ -51,8 +51,12 @@ export default function CreateMatch() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:8080/matches/${id}`);
-    setMatches(matches.filter((m) => m.id !== id));
+    try {
+      await axios.delete(`http://localhost:8080/matches/${id}`);
+      setMatches(matches.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Error deleting match:", err);
+    }
   };
 
   const handleEdit = (match) => {
@@ -62,10 +66,14 @@ export default function CreateMatch() {
   };
 
   const handleUpdate = async (id) => {
-    const updatedMatch = { ...editMatch, time: `${editMatch.date}T${editMatch.time}` };
-    const res = await axios.put(`http://localhost:8080/matches/${id}`, updatedMatch);
-    setMatches(matches.map((m) => (m.id === id ? res.data : m)));
-    setEditingId(null);
+    try {
+      const updatedMatch = { ...editMatch, time: `${editMatch.date}T${editMatch.time}` };
+      const res = await axios.put(`http://localhost:8080/matches/${id}`, updatedMatch); // ✅ Correct URL
+      setMatches(matches.map((m) => (m.id === id ? res.data : m)));
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error updating match:", err);
+    }
   };
 
   // Countdown logic
@@ -97,9 +105,27 @@ export default function CreateMatch() {
   return (
     <div className="admin-matches">
       <form className="create-form" onSubmit={handleSubmit}>
-        <input type="text" placeholder="Series" value={newMatch.series} onChange={(e) => setNewMatch({ ...newMatch, series: e.target.value })} required />
-        <input type="text" placeholder="Team 1" value={newMatch.team1} onChange={(e) => setNewMatch({ ...newMatch, team1: e.target.value })} required />
-        <input type="text" placeholder="Team 2" value={newMatch.team2} onChange={(e) => setNewMatch({ ...newMatch, team2: e.target.value })} required />
+        <input
+          type="text"
+          placeholder="Series"
+          value={newMatch.series}
+          onChange={(e) => setNewMatch({ ...newMatch, series: e.target.value })}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Team 1"
+          value={newMatch.team1}
+          onChange={(e) => setNewMatch({ ...newMatch, team1: e.target.value })}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Team 2"
+          value={newMatch.team2}
+          onChange={(e) => setNewMatch({ ...newMatch, team2: e.target.value })}
+          required
+        />
 
         <select value={newMatch.format} onChange={(e) => handleFormatChange(e.target.value)} required>
           <option value="T20">T20</option>
@@ -108,7 +134,7 @@ export default function CreateMatch() {
           <option value="WomensODI">WomensODI</option>
         </select>
 
-        <input type="number" placeholder="Count" value={newMatch.count} readOnly />
+        <input type="text" placeholder="Count" value={newMatch.count} readOnly />
 
         <input type="date" value={newMatch.date} onChange={(e) => setNewMatch({ ...newMatch, date: e.target.value })} required />
         <input type="time" value={newMatch.time} onChange={(e) => setNewMatch({ ...newMatch, time: e.target.value })} required />
@@ -119,12 +145,59 @@ export default function CreateMatch() {
         {matches.map((match) => (
           <div key={match.id} className="match-item">
             <div className="series-name">{match.series}</div>
-            <div className="match-info">
-              {match.team1} vs {match.team2} | {match.format} | Count {match.count}
-            </div>
-            <div className="match-time">
-              {match.date} {match.time} | Countdown: {countdowns[match.id]}
-            </div>
+
+            {editingId === match.id ? (
+              <div className="edit-form">
+                <input
+                  type="text"
+                  value={editMatch.series}
+                  onChange={(e) => setEditMatch({ ...editMatch, series: e.target.value })}
+                />
+                <input
+                  type="text"
+                  value={editMatch.team1}
+                  onChange={(e) => setEditMatch({ ...editMatch, team1: e.target.value })}
+                />
+                <input
+                  type="text"
+                  value={editMatch.team2}
+                  onChange={(e) => setEditMatch({ ...editMatch, team2: e.target.value })}
+                />
+                <select
+                  value={editMatch.format}
+                  onChange={(e) => {
+                    let count = "6";
+                    if (e.target.value === "ODI") count = "6+4";
+                    if (e.target.value === "WomensT20" || e.target.value === "WomensODI") count = "4+6";
+                    setEditMatch({ ...editMatch, format: e.target.value, count });
+                  }}
+                >
+                  <option value="T20">T20</option>
+                  <option value="ODI">ODI</option>
+                  <option value="WomensT20">WomensT20</option>
+                  <option value="WomensODI">WomensODI</option>
+                </select>
+                <input type="text" value={editMatch.count} readOnly />
+                <input
+                  type="date"
+                  value={editMatch.date}
+                  onChange={(e) => setEditMatch({ ...editMatch, date: e.target.value })}
+                />
+                <input
+                  type="time"
+                  value={editMatch.time}
+                  onChange={(e) => setEditMatch({ ...editMatch, time: e.target.value })}
+                />
+                <button onClick={() => handleUpdate(match.id)}>Update</button>
+                <button onClick={() => setEditingId(null)}>Cancel</button>
+              </div>
+            ) : (
+              <div className="match-info">
+                {match.team1} vs {match.team2} | {match.format} | Count {match.count}
+                <div className="match-time">{match.time} | Countdown: {countdowns[match.id]}</div>
+              </div>
+            )}
+
             <div className="match-actions">
               <button onClick={() => handleEdit(match)}>Edit</button>
               <button onClick={() => handleDelete(match.id)}>Delete</button>
